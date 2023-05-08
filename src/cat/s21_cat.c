@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <string.h>
+
 int file_position(int argc, char **argv);
 void read_all_files(int argc, char **argv, int file_post, int *arr_flags);
 int search_all_flags(char **argv, int file_post, int *arr_flags);
@@ -48,11 +50,16 @@ void read_all_files(int argc, char **argv, int file_post, int *arr_flags) {
 
         if ((arr_flags[4] == 1) && (current_content == '\t')) { /* flag -t*/
           printf("^I");
-
+        } else if ((arr_flags[7] == 1) &&
+                   (current_content == '\t')) { /* flag -T*/
+          printf("^I");
         } else if ((arr_flags[3] == 1) &&
                    (end_line >= 2 && current_content == '\n')) { /* flag -s */
         } else if ((arr_flags[1] == 1) &&
                    (current_content == '\n')) { /* flag -e */
+          printf("$\n");
+        } else if ((arr_flags[6] == 1) &&
+                   (current_content == '\n')) { /* flag -E */
           printf("$\n");
         } else {
           printf("%c", current_content);
@@ -71,6 +78,7 @@ void read_all_files(int argc, char **argv, int file_post, int *arr_flags) {
 
 int search_all_flags(char **argv, int file_post, int *arr_flags) {
   int res = 0;
+  char linux_flags[][17] = {"--number-nonblank", "--number", "--squeeze-blank"};
   char flags_amount[8] = {'b', 'e', 'n', 's', 't', 'v', 'E', 'T'};
   for (int i = 1; i < file_post; i++) {
     for (int j = 1; argv[i][j] != '\0'; j++) {
@@ -81,12 +89,19 @@ int search_all_flags(char **argv, int file_post, int *arr_flags) {
           arr_flags[k] = 1;
         }
       }
-      if (success == 0) {
-        res = 1;
-        printf("cat: illegal option -- %c\n", argv[i][j]);
+    if (success == 0) {
+      res = 1;
+      printf("cat: illegal option -- %c\n", argv[i][j]);
+    }
+    }
+
+    for (int k = 0; k < 3; k++) {
+      if (strcmp(argv[i], linux_flags[k]) == 0) {
+        arr_flags[k * 2] = 1;
       }
     }
   }
+
 
   return res;
 }
