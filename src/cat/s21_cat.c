@@ -34,22 +34,28 @@ void read_all_files(int argc, char **argv, int file_post, int *arr_flags) {
     if (file == NULL) {
       printf("cat: %s: No such file or directory\n", argv[i]);
     } else {
-      char content;
-      while ((content = fgetc(file)) != EOF) {
-        if ((arr_flags[4] == 1) && (content == '\t')) /* flag -t*/ {
-          printf("^I");
-        } else if ((arr_flags[1] == 1) && (content == '\n')) /* flag -e */ {
-          printf("$\n");
-
-        } else if ((arr_flags[2] == 1) &&
-                   (end_line != 0 || iter == 1)) /* flag -n */ {
+      char current_content;
+      while ((current_content = fgetc(file)) != EOF) {
+        if ((arr_flags[0] == 1) && (current_content != '\n') &&
+            (end_line >= 1 || iter == 1)) { /* flag -b */
           printf("%6d\t", iter);
-          printf("%c", content);
           iter++;
-        } else {
-          printf("%c", content);
+        } else if ((arr_flags[2] == 1 && arr_flags[0] == 0) &&
+                   (end_line != 0 || iter == 1)) { /* flag -n */
+          printf("%6d\t", iter);
+          iter++;
         }
-        if (content == '\n') {
+
+        if ((arr_flags[4] == 1) && (current_content == '\t')) { /* flag -t*/
+          printf("^I");
+        } else if ((arr_flags[1] == 1) &&
+                   (current_content == '\n')) { /* flag -e */
+          printf("$\n");
+        } else {
+          printf("%c", current_content);
+        }
+
+        if (current_content == '\n') {
           end_line++;
         } else {
           end_line = 0;
