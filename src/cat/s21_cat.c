@@ -48,6 +48,9 @@ void read_all_files(int argc, char **argv, int file_post, int *arr_flags) {
 
         if ((arr_flags[4] == 1) && (current_content == '\t')) { /* flag -t*/
           printf("^I");
+
+        } else if ((arr_flags[3] == 1) &&
+                   (end_line >= 2 && current_content == '\n')) { /* flag -s */
         } else if ((arr_flags[1] == 1) &&
                    (current_content == '\n')) { /* flag -e */
           printf("$\n");
