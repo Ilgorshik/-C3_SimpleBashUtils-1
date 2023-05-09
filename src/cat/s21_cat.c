@@ -54,7 +54,8 @@ void read_all_files(int argc, char **argv, int file_post, int *arr_flags) {
                    (current_content == '\t')) { /* flag -T*/
           printf("^I");
         } else if ((arr_flags[3] == 1) &&
-                   (end_line >= 2 && current_content == '\n')) { /* flag -s */
+                   (end_line >= 1 && current_content == '\n')) {
+          /* flag -s */  // was >= 2
         } else if ((arr_flags[1] == 1) &&
                    (current_content == '\n')) { /* flag -e */
           printf("$\n");
@@ -89,10 +90,10 @@ int search_all_flags(char **argv, int file_post, int *arr_flags) {
           arr_flags[k] = 1;
         }
       }
-    if (success == 0) {
-      res = 1;
-      printf("cat: illegal option -- %c\n", argv[i][j]);
-    }
+      if (success == 0) {
+        res = 1;
+        printf("cat: illegal option -- %c\n", argv[i][j]);
+      }
     }
 
     for (int k = 0; k < 3; k++) {
@@ -102,6 +103,17 @@ int search_all_flags(char **argv, int file_post, int *arr_flags) {
     }
   }
 
-
   return res;
 }
+
+/*if (current_content >= 0 && current_content < 32 && (current_content != 9) &&
+    (current_content != 10)) {
+  printf("^%c", current_content += 64);
+}
+if
+  else(current_content > 127 && current_content <= 160) {
+    printf("^M-%c", current_content -= 64);
+  }
+else
+  (current_content == 127) { printf("^?"); }
+  */
