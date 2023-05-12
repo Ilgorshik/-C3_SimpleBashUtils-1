@@ -62,6 +62,32 @@ void read_all_files(int argc, char **argv, int file_post, int *arr_flags) {
         } else if ((arr_flags[6] == 1) &&
                    (current_content == '\n')) { /* flag -E */
           printf("$\n");
+        if (arr_flags[5] ==1 || arr_flags[1] == 1 || arr_flags[4] == 1) {
+          if (current_content >= 0 && current_content < 32 && (current_content != 9) && (current_content != 10)) {
+            printf("^%c", current_content += 64);
+          }
+          if (current_content == 127) { printf("^?"); 
+          }
+          if (current_content >= 32 && current_content < 127) {
+            printf("%c", current_content);
+          }
+          if (current_content < 0) {
+            current_content &= 127; // бинарное (побитовое) умножение, отбрасывающее отрицательный знак в первом бите
+            int new_current_content = current_content + 128;
+            
+            if (new_current_content >= 128 && new_current_content < 160) {
+              printf("M-^%c", new_current_content - 64);
+            }
+            if (new_current_content == 255) {
+              printf("^?");
+            }
+            if (new_current_content >= 160 && new_current_content < 255) {
+              printf("%c", new_current_content);
+            }
+
+          }
+        }
+  
         } else {
           printf("%c", current_content);
         }
@@ -106,14 +132,3 @@ int search_all_flags(char **argv, int file_post, int *arr_flags) {
   return res;
 }
 
-/*if (current_content >= 0 && current_content < 32 && (current_content != 9) &&
-    (current_content != 10)) {
-  printf("^%c", current_content += 64);
-}
-if
-  else(current_content > 127 && current_content <= 160) {
-    printf("^M-%c", current_content -= 64);
-  }
-else
-  (current_content == 127) { printf("^?"); }
-  */
