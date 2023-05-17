@@ -39,8 +39,8 @@ void read_all_files(int argc, char **argv, int file_post, int *arr_flags) {
     } else {
       char current_content;
       while ((current_content = fgetc(file)) != EOF) {
-        // printf("<%d>", end_line);
-        if ((arr_flags[3] == 1) && end_line > 1 && current_content == '\n') {
+        
+        if ((arr_flags[3] == 1) && end_line > 1 && current_content == '\n') { //flag -s 
           continue;
         }
 
@@ -57,11 +57,7 @@ void read_all_files(int argc, char **argv, int file_post, int *arr_flags) {
         if ((arr_flags[4] == 1 || arr_flags[7] == 1) && (current_content == '\t')) { /* flag -t, T*/
           printf("^I");
         }
-        // else if ((arr_flags[3] == 1) &&
-        //            ((end_line >= 2 && current_content == '\n')|| (end_line == 1 && current_content == '\n' && first_end_line == 0))) {
-        //             //  continue;
-        //   /* flag -s */ 
-        // }
+      
         else if ((arr_flags[1] == 1 || arr_flags[6] == 1) &&
                    (current_content == '\n')) { /* flag -e, E */
           printf("$\n");
@@ -118,69 +114,32 @@ void read_all_files(int argc, char **argv, int file_post, int *arr_flags) {
 
 int search_all_flags(char **argv, int file_post, int *arr_flags) {
   int res = 0;
-  //пример построчного считывания массива
+ 
   
-  char linux_flags[][17] = {"-b", "-e", "-n", "-s", "-t", "-v", "-E", "-T" ,"--number-nonblank", "--number", "--squeeze-blank"};
-  char match_gnu_flags[][] = {'b', 'e', 'n', 's', 't', 'v', 'E', 'T', 'b', 'n', 's'};
-
-
-  цикл i = 0; i < file_post
-    цикл по j = 0; j < длина(linux_flags)(6)
-      если строка argv[i] совпадает со строкой linux_flags[j] и j > 2
-        переменная = match_gnu_flags[i];
-        return match_gnu_flags[i];
-      иначе это гну флаг и:
-        переменная = match_gnu_flags[i];
-        return match_gnu_flags[i];
-  return переменная
-
-
-
-
-////////////////////////////////// посимвольно
-здесь тоже есть какой-то цикл для итерации по аргв
-    если strlen(argv) > 1 && АРГВ[k][1] == '-'
-      парсить флаг гну
-      если strlen(argv) > 2
-        запускаем цикл для итерации по элементам "linux_flags" 
-        цикл от i = 0 до i < 3
-          {
-            цикл от j = 2 до j < strlen(argv) {
-              если linux_flags[i][j] == arvg[k][j]
-            }
-            match_gnu_flags[i] активируешь флаг
-
-          return match_gnu_flags[i]
-
-            
-          }
-      {
-        цикл от i = 2 до  i < strlen(argv)
-
-      }
-    иначе //реализация обычных флагов, если сделать все в одну можно убрать вторую часть
-
-
-  char flags_amount[8] = {'b', 'e', 'n', 's', 't', 'v', 'E', 'T'};
+  char linux_flags[][25] = {"--number-nonblank", "--number", "--squeeze-blank"};
+  char flags_amount[8] = {'b', 'e', 'n', 's', 't', 'v', 'E', 'T'}; // t и s поменять местами
   for (int i = 1; i < file_post; i++) {
-    for (int j = 1; argv[i][j] != '\0'; j++) {
-      int success = 0;
-      for (int k = 0; k < 8; k++) {
-        if (argv[i][j] == flags_amount[k]) {
-          success = 1;
-          arr_flags[k] = 1;
+    if(argv[i][1] == '-') { 
+      for (int k = 0; k < 3; k++) {
+        if (strcmp(argv[i], linux_flags[k]) == 0) {
+          arr_flags[k * 2] = 1;
         }
       }
-      if (success == 0) {
-        res = 1;
-        fprintf(stderr, "cat: illegal option -- %c\n", argv[i][j]);
+    } else {
+      for (int j = 1; argv[i][j] != '\0'; j++) {
+        int success = 0;
+        for (int k = 0; k < 8; k++) {
+          if (argv[i][j] == flags_amount[k]) {
+            success = 1;
+            arr_flags[k] = 1;
+          }
+        }
+        if (success == 0) {
+          res = 1;
+          fprintf(stderr, "cat: illegal option -- %c\n", argv[i][j]);
+        }
       }
-    }
 
-    for (int k = 0; k < 3; k++) {
-      if (strcmp(argv[i], linux_flags[k]) == 0) {
-        arr_flags[k * 2] = 1;
-      }
     }
   }
 
