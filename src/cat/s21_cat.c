@@ -40,7 +40,7 @@ void read_all_files(int argc, char **argv, int file_post, int *arr_flags) {
       char current_content;
       while ((current_content = fgetc(file)) != EOF) {
         
-        if ((arr_flags[3] == 1) && end_line > 1 && current_content == '\n') { //flag -s 
+        if ((arr_flags[4] == 1) && end_line > 1 && current_content == '\n') { //flag -s 
           continue;
         }
 
@@ -54,14 +54,14 @@ void read_all_files(int argc, char **argv, int file_post, int *arr_flags) {
           iter++;
         }
 
-        if ((arr_flags[4] == 1 || arr_flags[7] == 1) && (current_content == '\t')) { /* flag -t, T*/
+        if ((arr_flags[3] == 1 || arr_flags[7] == 1) && (current_content == '\t')) { /* flag -t, T*/
           printf("^I");
         }
       
         else if ((arr_flags[1] == 1 || arr_flags[6] == 1) &&
                    (current_content == '\n')) { /* flag -e, E */
           printf("$\n");
-        } else if (arr_flags[5] == 1 || arr_flags[1] == 1 || arr_flags[4] == 1) {
+        } else if (arr_flags[5] == 1 || arr_flags[1] == 1 || arr_flags[3] == 1) {
           if (current_content >= 0 && current_content < 32 &&
               (current_content != 9) && (current_content != 10)) {
             printf("^%c", current_content + 64);
@@ -117,7 +117,7 @@ int search_all_flags(char **argv, int file_post, int *arr_flags) {
  
   
   char linux_flags[][25] = {"--number-nonblank", "--number", "--squeeze-blank"};
-  char flags_amount[8] = {'b', 'e', 'n', 's', 't', 'v', 'E', 'T'}; // t и s поменять местами
+  char flags_amount[8] = {'b', 'e', 'n', 't', 's', 'v', 'E', 'T'}; // t и s поменял местами
   for (int i = 1; i < file_post; i++) {
     if(argv[i][1] == '-') { 
       for (int k = 0; k < 3; k++) {
