@@ -12,7 +12,6 @@ int main(int argc, char **argv) {
   if (flags != 1) {
     read_all_files(argc, argv, file_post, arr_flags);
     for (int i = 0; i < 8; i++) {
-      //printf("%d", arr_flags[i]);
     }
   }
 
@@ -39,8 +38,8 @@ void read_all_files(int argc, char **argv, int file_post, int *arr_flags) {
     } else {
       char current_content;
       while ((current_content = fgetc(file)) != EOF) {
-        
-        if ((arr_flags[4] == 1) && end_line > 1 && current_content == '\n') { //flag -s 
+        if ((arr_flags[4] == 1) && end_line > 1 &&
+            current_content == '\n') {  // flag -s
           continue;
         }
 
@@ -54,14 +53,16 @@ void read_all_files(int argc, char **argv, int file_post, int *arr_flags) {
           iter++;
         }
 
-        if ((arr_flags[3] == 1 || arr_flags[7] == 1) && (current_content == '\t')) { /* flag -t, T*/
+        if ((arr_flags[3] == 1 || arr_flags[7] == 1) &&
+            (current_content == '\t')) { /* flag -t, T*/
           printf("^I");
         }
-      
+
         else if ((arr_flags[1] == 1 || arr_flags[6] == 1) &&
-                   (current_content == '\n')) { /* flag -e, E */
+                 (current_content == '\n')) { /* flag -e, E */
           printf("$\n");
-        } else if (arr_flags[5] == 1 || arr_flags[1] == 1 || arr_flags[3] == 1) {
+        } else if (arr_flags[5] == 1 || arr_flags[1] == 1 ||
+                   arr_flags[3] == 1) {
           if (current_content >= 0 && current_content < 32 &&
               (current_content != 9) && (current_content != 10)) {
             printf("^%c", current_content + 64);
@@ -90,7 +91,7 @@ void read_all_files(int argc, char **argv, int file_post, int *arr_flags) {
             }
           }
 
-        }  else {
+        } else {
           printf("%c", current_content);
         }
 
@@ -105,21 +106,19 @@ void read_all_files(int argc, char **argv, int file_post, int *arr_flags) {
           end_line = 0;
         }
         position_char++;
-        
       }
     }
-    fclose(file);
+    if (file != NULL) fclose(file);
   }
 }
 
 int search_all_flags(char **argv, int file_post, int *arr_flags) {
   int res = 0;
- 
-  
+
   char linux_flags[][25] = {"--number-nonblank", "--number", "--squeeze-blank"};
-  char flags_amount[8] = {'b', 'e', 'n', 't', 's', 'v', 'E', 'T'}; // t и s поменял местами
+  char flags_amount[8] = {'b', 'e', 'n', 't', 's', 'v', 'E', 'T'};
   for (int i = 1; i < file_post; i++) {
-    if(argv[i][1] == '-') { 
+    if (argv[i][1] == '-') {
       for (int k = 0; k < 3; k++) {
         if (strcmp(argv[i], linux_flags[k]) == 0) {
           arr_flags[k * 2] = 1;
@@ -139,7 +138,6 @@ int search_all_flags(char **argv, int file_post, int *arr_flags) {
           fprintf(stderr, "cat: illegal option -- %c\n", argv[i][j]);
         }
       }
-
     }
   }
 
