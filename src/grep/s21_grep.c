@@ -1,50 +1,90 @@
 #include "s21_grep.h"
-// 3 массива:  один под файлы, другой под шаблоны (то что ищем), третий под файлы (двумерные), один под флаги одномерный
+
 void parsing(int argc, char **argv);
+
 int main(int argc, char **argv) {
+  char arr_flags[10], **arr_templates, **arr_files;
 
-    parsing( argc,  argv);
-    return 0;
+  parsing(argc, argv);
+  return 0;
 }
-
 
 void parsing(int argc, char **argv) {
-    int error_cnt, flag_options;
-    
-    while ((flag_options = getopt_long(argc, argv, "e:ivclnhsf:o", NULL, NULL )) != -1) {
-        printf("%c\n", flag_options);
-        //printf ("%d\n", optind);
-        //printf("%c\n", optarg);
-        if (flag_options == e) {
+  int flag_options, i = 0, n = 0;
+  char arr_flags[10] = {0};
+  char arr_templates[200][200] = {0};
 
-        }
-        if else (flag_options == i ) {
-
-        }
-        if else (flag_options == v ) {
-            
-        }
-        if else (flag_options == c) {
-            
-        }
-        if else (flag_options == l ) {
-            
-        }
-        if else (flag_options == n ) {
-            
-        }
-        if else (flag_options == h) {
-            
-        }
-        if else (flag_options == s) {
-            
-        }
-        if else (flag_options == f ) {
-            
-        }
-        if else (flag_options == o ) {
-            
-        }
+  while ((flag_options = getopt_long(argc, argv, "e:ivclnhsf:o", NULL, NULL)) !=
+         -1) {
+    if (strchr(arr_flags, flag_options) == 0 && (flag_options !='?')) {
+      arr_flags[i] = flag_options;
+      i++;
     }
-}
 
+    if (flag_options != 'e' || flag_options != 'f') {
+       strcpy(arr_templates[0], "kk");
+      // char ***arr_files = argv[optind + 1];
+    //} else {
+       //arr_templates = optarg;
+      // char ***arr_files = argv[optind];
+    }
+  }
+
+  printf("%s", arr_flags);
+  printf("%s", arr_templates);
+}
+// int flags_content(int flag_options) {
+//   if (flag_options == e) {
+//   }
+//   if
+//     else(flag_options == i) {
+//     }
+//   if
+//     else(flag_options == v) {
+//     }
+//   if
+//     else(flag_options == c) {
+//     }
+//   if
+//     else(flag_options == l) {
+//     }
+//   if
+//     else(flag_options == n) {
+//     }
+//   if
+//     else(flag_options == h) {
+//     }
+//   if
+//     else(flag_options == s) {
+//     }
+//   if
+//     else(flag_options == f) {
+//     }
+//   if
+//     else(flag_options == o) {
+//     }
+// }
+
+// int template_find(int argc, char **argv) {
+//   regex_t regex;
+//   regcomp(&regex, "int", 0);
+//   if (regexec(&regex, "int main() {", 0, NULL, 0) == 0) {
+//     printf("Yes!");
+//   }
+//   regfree(&regex);
+//   return 0;
+// }
+// int file_opening(int argc, char **argv, ) {
+//   if (flag_options != f || flag_options != e)
+//     for (int i = argv[optind]; i < argc; i++) {
+//       FILE *file = fopen(argv[i], "r");
+//       if (file == NULL) {
+//         fprintf(stderr, "grep: %s: No such file or directory\n", argv[i]);
+//       } else {
+//         char current_line;
+//         while ((current_content = getline(file)) != EOF) {
+
+//         }
+//       }
+//     }
+// }
