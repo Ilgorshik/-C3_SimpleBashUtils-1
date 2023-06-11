@@ -1,37 +1,46 @@
 #include "s21_grep.h"
-
-void parsing(int argc, char **argv);
+char files_samples(int argc, char **argv, int *j);
+void parsing(int argc, char **argv, int *j);
 
 int main(int argc, char **argv) {
+  int j = 0;
   char arr_flags[10], **arr_templates, **arr_files;
 
-  parsing(argc, argv);
+  parsing(argc, argv, &j);
   return 0;
 }
 
-void parsing(int argc, char **argv) {
+void parsing(int argc, char **argv, int *j) {
   int flag_options, i = 0, n = 0;
   char arr_flags[10] = {0};
   char arr_templates[200][200] = {0};
 
   while ((flag_options = getopt_long(argc, argv, "e:ivclnhsf:o", NULL, NULL)) !=
          -1) {
-    if (strchr(arr_flags, flag_options) == 0 && (flag_options !='?')) {
+    if (strchr(arr_flags, flag_options) == 0 && (flag_options != '?')) {
       arr_flags[i] = flag_options;
       i++;
     }
-
-    if (flag_options != 'e' || flag_options != 'f') {
-       strcpy(arr_templates[0], "kk");
-      // char ***arr_files = argv[optind + 1];
+    if (flag_options == 'e') {
+      strcpy(arr_templates[*j], optarg);
+      (*j)++;
+    } else if (flag_options == 'f') {
+      files_samples(argc, argv, j);
+    }
+    // char ***arr_files = argv[optind + 1];
     //} else {
-       //arr_templates = optarg;
-      // char ***arr_files = argv[optind];
+    // arr_templates = optarg;
+    // char ***arr_files = argv[optind];
+  }
+  // if (flag_options != 'e' || flag_options != 'f') {
+  //    strcpy(arr_templates[0], argv[optind]);
+  // }
+  printf("%s\n", arr_flags);
+  for (int k = 0; k < (*j); k++) {
+    for (int l = 0; arr_templates[k][l] != '\0'; l++) {
+      printf("%c", arr_templates[k][l]);
     }
   }
-
-  printf("%s", arr_flags);
-  printf("%s", arr_templates);
 }
 // int flags_content(int flag_options) {
 //   if (flag_options == e) {
@@ -88,3 +97,21 @@ void parsing(int argc, char **argv) {
 //       }
 //     }
 // }
+
+char files_samples(int argc, char **argv, int *j) {
+  size_t n = 0;
+  char arr_templates[200][200] = {0};
+  char *arr_line_buffer = {0};
+  FILE *file = fopen(optarg, "r");
+  if (file == NULL) {
+    fprintf(stderr, "grep: %s: No such file or directory\n", optarg);
+  } else {
+    char current_line;
+    while ((current_line = getline(&arr_line_buffer, &n, file )) != -1) {
+      //strcpy(arr_templates[*j], arr_line_buffer);
+      memcpy(arr_templates[*j], arr_line_buffer, 200);
+      (*j)++;
+    }
+    free(arr_line_buffer);
+  }
+}
