@@ -1,6 +1,9 @@
 #include "s21_grep.h"
-char files_samples(int argc, char **argv, int *j);
+char files_samples(int argc, char **argv, char arr_templates[1000][1000],
+                   int *j);
 void parsing(int argc, char **argv, int *j);
+
+int file_counter(int argc, char **argv);
 
 int main(int argc, char **argv) {
   int j = 0;
@@ -13,8 +16,8 @@ int main(int argc, char **argv) {
 void parsing(int argc, char **argv, int *j) {
   int flag_options, i = 0, n = 0;
   char arr_flags[10] = {0};
-  char arr_templates[200][200] = {0};
-
+  char arr_templates[1000][1000] = {0};
+  char arr_files[1000][1000] = {0};
   while ((flag_options = getopt_long(argc, argv, "e:ivclnhsf:o", NULL, NULL)) !=
          -1) {
     if (strchr(arr_flags, flag_options) == 0 && (flag_options != '?')) {
@@ -25,23 +28,51 @@ void parsing(int argc, char **argv, int *j) {
       strcpy(arr_templates[*j], optarg);
       (*j)++;
     } else if (flag_options == 'f') {
-      files_samples(argc, argv, j);
+      files_samples(argc, argv, arr_templates, j);
     }
-    // char ***arr_files = argv[optind + 1];
-    //} else {
-    // arr_templates = optarg;
-    // char ***arr_files = argv[optind];
+    
+
   }
-  // if (flag_options != 'e' || flag_options != 'f') {
-  //    strcpy(arr_templates[0], argv[optind]);
-  // }
-  printf("%s\n", arr_flags);
+
+  //printf("%s\n", arr_flags);
+
   for (int k = 0; k < (*j); k++) {
-    for (int l = 0; arr_templates[k][l] != '\0'; l++) {
-      printf("%c", arr_templates[k][l]);
+    
+    //printf("%s\n", arr_templates[k]);
+  }
+  if ((strchr(arr_flags, 'e') == 0) || (strchr(arr_flags, 'f')) == 0) {
+    strcpy(arr_templates[0], argv[optind]);
+    strcpy(arr_files[0], argv[optind+1]);
+    printf("%s", arr_templates[0]);
+    printf("%s", arr_files[0]);
+  }
+  // для флага ф и е, просто оптинд, сделать условие отдельно тут ниже.  массивы с флагами шаблонами файлами передавать в regex, а regex передается в функцию где открывается файл
+}
+
+
+char files_samples(int argc, char **argv, char arr_templates[1000][1000],
+                   int *j) {
+  size_t n = 0;
+  char *arr_line_buffer = {0};
+  FILE *file = fopen(optarg, "r");
+  if (file == NULL) {
+    fprintf(stderr, "grep: %s: No such file or directory\n", optarg);
+  } else {
+    char current_line;
+    while ((current_line = getline(&arr_line_buffer, &n, file)) != -1) {
+      char *line_pos = strchr(arr_line_buffer, '\n');
+      if (line_pos != 0) {
+        *line_pos = '\0';
+      }
+
+      strcpy(arr_templates[*j], arr_line_buffer);
+
+      (*j)++;
     }
+    free(arr_line_buffer);
   }
 }
+
 // int flags_content(int flag_options) {
 //   if (flag_options == e) {
 //   }
@@ -97,21 +128,3 @@ void parsing(int argc, char **argv, int *j) {
 //       }
 //     }
 // }
-
-char files_samples(int argc, char **argv, int *j) {
-  size_t n = 0;
-  char arr_templates[200][200] = {0};
-  char *arr_line_buffer = {0};
-  FILE *file = fopen(optarg, "r");
-  if (file == NULL) {
-    fprintf(stderr, "grep: %s: No such file or directory\n", optarg);
-  } else {
-    char current_line;
-    while ((current_line = getline(&arr_line_buffer, &n, file )) != -1) {
-      //strcpy(arr_templates[*j], arr_line_buffer);
-      memcpy(arr_templates[*j], arr_line_buffer, 200);
-      (*j)++;
-    }
-    free(arr_line_buffer);
-  }
-}
