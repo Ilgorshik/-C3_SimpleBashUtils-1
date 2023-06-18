@@ -1,72 +1,57 @@
 #include "s21_grep.h"
-void files_samples(int argc, char **argv, char arr_templates[100][100],
-                   int *counter_templates, int *counter_files);
-void parsing(int argc, char **argv, int *counter_templates, int *counter_files);
-
-int file_counter_templates(int argc, char **argv);
-
-int template_find(char arr_flags[10], char **arr_templates,
-                  char *arr_line_buffer, int *counter_templates);
-int file_opening(char arr_flags[10], char **arr_templates, char **arr_files, int *counter_templates, int *counter_files);
 
 int main(int argc, char **argv) {
-  int counter_templates = 0;
-  int counter_files = 0;
-  char arr_flags[10], **arr_templates, **arr_files;
+  storage_arrays all_arrays = {0};
 
-  parsing(argc, argv, &counter_templates, &counter_files);
-
-  
-  file_opening(arr_flags, arr_templates, arr_files, &counter_templates, &counter_files);
+  parsing(argc, argv, &all_arrays);
+  // printing(all_arrays);
+  file_opening(all_arrays);
   return 0;
 }
 
-void parsing(int argc, char **argv, int *counter_templates, int *counter_files) {
+void parsing(int argc, char **argv, storage_arrays *all_arrays) {
   int flag_options, i = 0;
-  char arr_flags[10] = {0};
-  char arr_templates[100][100] = {0}; //не нужно создавать в парсинге а нужно из мейна передать в функцию, лучше всего создать структуры куда запихать все массивы и везде таскать (создать в заголовке)
-  char arr_files[100][100] = {0};
   while ((flag_options = getopt_long(argc, argv, "e:ivclnhsf:o", NULL, NULL)) !=
          -1) {
-    if (strchr(arr_flags, flag_options) == 0 && (flag_options != '?')) {
-      arr_flags[i] = flag_options;
+    if (strchr(all_arrays->arr_flags, flag_options) == 0 &&
+        (flag_options != '?')) {
+      all_arrays->arr_flags[i] = flag_options;
       i++;
     }
     if (flag_options == 'e') {
-      strcpy(arr_templates[*counter_templates], optarg);
-      (*counter_templates)++;
+      strcpy(all_arrays->arr_templates[all_arrays->counter_templates], optarg);
+      (all_arrays->counter_templates)++;
     } else if (flag_options == 'f') {
-      files_samples(argc, argv, arr_templates, counter_templates, counter_files);
+      flag_f(all_arrays);
     }
   }
-  if ((strchr(arr_flags, 'e') == 0) && (strchr(arr_flags, 'f')) == 0) {
-    strcpy(arr_templates[0], argv[optind]);
-    printf("%d\n", optind);
-    for (*counter_files = 0; ((*counter_files) < argc) && (optind + 1 < argc); ((*counter_files)++) , (optind++)) {
-      strcpy(arr_files[*counter_files], argv[optind+1]);
-    
+  if ((strchr(all_arrays->arr_flags, 'e') == 0) &&
+      (strchr(all_arrays->arr_flags, 'f')) == 0) {
+    strcpy(all_arrays->arr_templates[0], argv[optind]);
+    all_arrays->counter_templates++;
+    for (all_arrays->counter_files = 0;
+         ((all_arrays->counter_files) < argc) && (optind + 1 < argc);
+         ((all_arrays->counter_files)++), (optind++)) {
+      strcpy(all_arrays->arr_files[all_arrays->counter_files],
+             argv[optind + 1]);
     }
   } else {
-    for (*counter_files = 0; ((*counter_files) < argc) && (optind < argc); ((*counter_files)++) , (optind++)) {
-      strcpy(arr_files[*counter_files], argv[optind]);
+    for (all_arrays->counter_files = 0;
+         ((all_arrays->counter_files) < argc) && (optind < argc);
+         ((all_arrays->counter_files)++), (optind++)) {
+      strcpy(all_arrays->arr_files[all_arrays->counter_files], argv[optind]);
     }
   }
-  printf("%s\n", arr_flags);
-  for (int m = 0; m <= *counter_templates; m++) {
-  printf("%s\n", arr_templates[m]);
-  }
-  printf("files:\n");
-  for (int l = 0; l < *counter_files; l++)
-  printf("%s\n", arr_files[l]);
 }
 
-void files_samples(int argc, char **argv, char arr_templates[1000][1000],
-                   int *counter_templates, int *counter_files) {
+void flag_f(storage_arrays *all_arrays) {
   size_t n = 0;
   char *arr_line_buffer = {0};
   FILE *file = fopen(optarg, "r");
   if (file == NULL) {
-    fprintf(stderr, "grep: %s: No such file or directory\n", optarg);
+    if (strchr(all_arrays->arr_flags, 's') == 0) {
+      fprintf(stderr, "grep: %s: No such file or directory\n", optarg);
+    }
   } else {
     char current_line;
     while ((current_line = getline(&arr_line_buffer, &n, file)) != -1) {
@@ -75,72 +60,150 @@ void files_samples(int argc, char **argv, char arr_templates[1000][1000],
         *line_pos = '\0';
       }
 
-      strcpy(arr_templates[*counter_templates], arr_line_buffer);
+      strcpy(all_arrays->arr_templates[all_arrays->counter_templates],
+             arr_line_buffer);
 
-      (*counter_templates)++;
+      (all_arrays->counter_templates)++;
     }
-    free(arr_line_buffer);
+    if (arr_line_buffer) {
+      free(arr_line_buffer);
+    }
+    fclose(file);
   }
 }
-int template_find(char arr_flags[10], char **arr_templates,
-                  char *arr_line_buffer, int *counter_templates) {
+
+int template_find(storage_arrays *all_arrays, char *line) {
+  int compilation = 0;
+  int find = 0;
   regex_t regex;
-  for (int i = 0; i < (*counter_templates); i++) {
-    regcomp(&regex, arr_templates[i], 0);
-    if (regexec(&regex, arr_line_buffer, 0, NULL, 0) == 0) {
-      printf("Yes!"); //прописать вывод всего 
-      //flags_content(flag_options);
+  regmatch_t pmatch[10];
+  size_t nmatch = 1;
+  for (int i = 0; i < (all_arrays->counter_templates); i++) {
+    if (strchr(all_arrays->arr_flags, 'i') != 0) {
+      compilation = regcomp(&regex, all_arrays->arr_templates[i], REG_ICASE);
+    } else {
+      compilation = regcomp(&regex, all_arrays->arr_templates[i], 0);
     }
+    if ((compilation == 0) && regexec(&regex, line, nmatch, pmatch, 0) == 0) {
+      find = 1;
+      get_subtext(all_arrays->subtext, line, pmatch->rm_so, pmatch->rm_eo);
+      all_arrays->subtext_count = subtext_count(all_arrays->subtext, line);
+    }
+    regfree(&regex);
   }
-  regfree(&regex);
-  return 0;
-}
-// int flags_content(int flag_options) {
-//   if (flag_options == e) {
-//   }
-//   if
-//     else(flag_options == i) {
-//     }
-//   if
-//     else(flag_options == v) {
-//     }
-//   if
-//     else(flag_options == c) {
-//     }
-//   if
-//     else(flag_options == l) {
-//     }
-//   if
-//     else(flag_options == n) {
-//     }
-//   if
-//     else(flag_options == h) {
-//     }
-//   if
-//     else(flag_options == s) {
-//     }
-//   if
-//     else(flag_options == f) {
-//     }
-//   if
-//     else(flag_options == o) {
-//     }
-// }
-
-int file_opening(char arr_flags[10], char **arr_templates, char **arr_files, int *counter_templates, int *counter_files) {
-  size_t n = 0;
-  char *arr_line_buffer = {0};
-  for (int i = 0; i < *counter_files; i++) {
-  FILE *file =fopen(arr_files[i], "r");
-  if (file == NULL) {
-    fprintf(stderr, "grep: %s: No such file or directory\n", *arr_files);
+  if ((strchr(all_arrays->arr_flags, 'v') != 0 && find == 0) ||
+      (strchr(all_arrays->arr_flags, 'v') == 0 && find == 1)) {
+    find = 1;
   } else {
-    char current_line;
-    while ((current_line = getline(&arr_line_buffer, &n, file)) != EOF) {
-      template_find(arr_flags, arr_templates, arr_line_buffer, counter_templates);
-     
+    find = 0;
+  }
+  
+  return find;
+}
+
+void file_opening(storage_arrays all_arrays) {
+  size_t n = 0;
+  char *line = NULL;
+  for (int i = 0; i < all_arrays.counter_files; i++) {
+    FILE *file = fopen(all_arrays.arr_files[i], "r");
+    if (file == NULL) {
+      if (strchr(all_arrays.arr_flags, 's') == 0) {
+        fprintf(stderr, "grep: %s: No such file or directory\n",
+                all_arrays.arr_files[i]);
+      }
+    } else {
+      char current_line = 0;
+      int match_count = 0;
+      int find = 0;
+      int line_number = 0;
+      while ((current_line = getline(&line, &n, file)) != -1) {
+        line_number++;
+        find = template_find(&all_arrays, line);
+        result_printing(all_arrays, find, line, &match_count, 0,
+                        all_arrays.arr_files[i], line_number);
+      }
+      result_printing(all_arrays, find, line, &match_count, 1,
+                      all_arrays.arr_files[i], line_number);
+
+      fclose(file);
     }
   }
-  fclose(file);
+  if (line) {
+    free(line);
   }
+}
+
+void printing(storage_arrays all_arrays) {
+  printf("flags:\n");
+  printf("%s\n", all_arrays.arr_flags);
+  printf("templates:\n");
+  for (int m = 0; m < all_arrays.counter_templates; m++) {
+    printf("%s\n", all_arrays.arr_templates[m]);
+  }
+  printf("files:\n");
+  for (int l = 0; l < all_arrays.counter_files; l++)
+    printf("%s\n", all_arrays.arr_files[l]);
+}
+
+void result_printing(storage_arrays all_arrays, int find, char *line,
+                     int *match_count, int after_while, char *filename,
+                     int line_number) {
+  if (find == 1 && strchr(all_arrays.arr_flags, 'c') == 0 &&
+      strchr(all_arrays.arr_flags, 'l') == 0 && after_while == 0) {
+    if (all_arrays.counter_files > 1 &&
+        strchr(all_arrays.arr_flags, 'h') == 0) {
+      printf("%s:", filename);
+    }
+    if (strchr(all_arrays.arr_flags, 'n') != 0) {
+      printf("%d:", line_number);
+    }
+    if (strchr(all_arrays.arr_flags, 'o') != 0) {
+      for (int i = 0; i < all_arrays.subtext_count; i++) {
+        printf("%s\n", all_arrays.subtext);
+      }
+    } else {
+      if (strchr(line, '\n') == 0) {
+        printf("%s\n", line);
+      } else {
+        printf("%s", line);
+      }
+    }
+  }
+  if (find == 1 && after_while == 0) {
+    (*match_count)++;
+  }
+  if (after_while == 1) {
+    if (strchr(all_arrays.arr_flags, 'l') != 0 && (*match_count) != 0) {
+      *match_count = 1;
+    }
+    if (strchr(all_arrays.arr_flags, 'c') != 0) {
+      if (all_arrays.counter_files > 1 &&
+          strchr(all_arrays.arr_flags, 'h') == 0) {
+        printf("%s:", filename);
+      }
+      printf("%d\n", *match_count);
+    }
+    if (strchr(all_arrays.arr_flags, 'l') != 0 && (*match_count) != 0) {
+      printf("%s\n", filename);
+    }
+  }
+}
+
+void get_subtext(char *subtext, char *text, int start, int end) {
+  for (int i = 0; i < (end - start); i++) {
+    subtext[i] = text[start + i];
+  }
+}
+
+int subtext_count(char *subtext, char *text) {
+  int count = 0;
+  int j = 0;
+  for (int i = 0; i <= (int)(strlen(text) - strlen(subtext)); i++) {
+    for (j = 0; j < (int)strlen(subtext) && subtext[j] == text[i + j]; j++) {
+    }
+    if (j == (int)strlen(subtext)) {
+      count++;
+    }
+  }
+  return count;
 }
