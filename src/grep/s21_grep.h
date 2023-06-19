@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #include <getopt.h>
 #include <regex.h>
 #include <stdio.h>

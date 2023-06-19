@@ -2,10 +2,11 @@
 
 int main(int argc, char **argv) {
   storage_arrays all_arrays = {0};
-
-  parsing(argc, argv, &all_arrays);
-  // printing(all_arrays);
-  file_opening(all_arrays);
+  if (argc > 2) {
+    parsing(argc, argv, &all_arrays);
+    // printing(all_arrays);
+    file_opening(all_arrays);
+  }
   return 0;
 }
 
@@ -56,7 +57,7 @@ void flag_f(storage_arrays *all_arrays) {
     char current_line;
     while ((current_line = getline(&arr_line_buffer, &n, file)) != -1) {
       char *line_pos = strchr(arr_line_buffer, '\n');
-      if (line_pos != 0) {
+      if (line_pos != 0 && strlen(arr_line_buffer) > 1) {
         *line_pos = '\0';
       }
 
@@ -97,7 +98,7 @@ int template_find(storage_arrays *all_arrays, char *line) {
   } else {
     find = 0;
   }
-  
+
   return find;
 }
 
@@ -157,7 +158,8 @@ void result_printing(storage_arrays all_arrays, int find, char *line,
     if (strchr(all_arrays.arr_flags, 'n') != 0) {
       printf("%d:", line_number);
     }
-    if (strchr(all_arrays.arr_flags, 'o') != 0) {
+    if (strchr(all_arrays.arr_flags, 'o') != 0 &&
+        strchr(all_arrays.arr_flags, 'v') == 0) {
       for (int i = 0; i < all_arrays.subtext_count; i++) {
         printf("%s\n", all_arrays.subtext);
       }
@@ -190,9 +192,11 @@ void result_printing(storage_arrays all_arrays, int find, char *line,
 }
 
 void get_subtext(char *subtext, char *text, int start, int end) {
-  for (int i = 0; i < (end - start); i++) {
+  int i = 0;
+  for (i = 0; i < (end - start); i++) {
     subtext[i] = text[start + i];
   }
+  subtext[i] = '\0';
 }
 
 int subtext_count(char *subtext, char *text) {
